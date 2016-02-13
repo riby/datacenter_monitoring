@@ -2,7 +2,8 @@
 from flask import Flask, jsonify
 import GangliaStatus
 from flask import Response
-Hosts={}
+import fabfile as fb
+#Hosts={}
 
 app = Flask(__name__)
 
@@ -11,6 +12,12 @@ app = Flask(__name__)
 def test_server():
     return "Hello World"
 
+@app.route('/atlas/nagios',methods=['GET'])
+def get_nagios_data():
+    fb.getValue()
+    Hosts=fb.Hosts
+    print len(Hosts)
+    return jsonify(Hosts)
 @app.route('/atlas/ganglia',methods=['GET'])
 def get_ganglia_data():
     GangliaStatus.getData('admin')
