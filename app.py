@@ -36,6 +36,7 @@ def get_torque_data():
     lst=[]
     dct=dict()
     Hosts=TS.Hosts
+    dct['Host']='State,Slots,SlotsUsed,Jobs,AvailMem,TotalMem'
     for h in Hosts.values():
 	l1=(str(h.State[0])+","+str(h.Slots)+","+str(h.SlotsUsed)+","+str(h.Jobs)+","+str(h.AvailMem)+","+str(h.TotalMem))# last is memory used
 	dct[h.Name]=l1
@@ -52,6 +53,7 @@ def get_ganglia_data():
     lst=[]
     dct=dict()
     Hosts=GangliaStatus.Hosts
+    dct['hosts']='IP,Swap_Total,Swap_Free,Swap_Used,Proc_Run,Cpu_User,Cpu_Wio'
     for h in Hosts.values():
         if h.Swap_Free !=None:
     #            print h.Name, h.IP, h.Reported, h.Swap_Total,h.Swap_Free,(h.Swap_Total-h.Swap_Free)
