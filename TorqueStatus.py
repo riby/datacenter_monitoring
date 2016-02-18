@@ -19,13 +19,19 @@ class TorqueHost:
         self.Jobs = None         # number of torque jobs on that node (as seen by mom?)
 	self.AvailMem = None
 	self.TotalMem = None
-        
+	self.RecTime = None
+	self.LoadAve = None
+	self.NetLoad = None        
     def setState(self,s): self.State=s
     def setSlots(self,s): self.Slots = s
     def setSlotsUsed(self,c): self.SlotsUsed = c
     def setJobList(self,j): self.Jobs=j
     def setAvailMem(self,s): self.AvailMem=s
     def setTotalMem(self,s): self.TotalMem=s
+    def setRecTime(self,s): self.RecTime=s
+    def setLoadAve(self,s): self.LoadAve=s
+    def setNetLoad(self,s): self.NetLoad=s
+
     #
     # Generate HTML description for the node (mostly point to CGI script)
     def getSummary(self,CGIURL='Something'):
@@ -81,6 +87,22 @@ def getData():
             host.setTotalMem(totalmem)
         except:
             pass
+        try:
+            rectime=nodes[node]['status']['rectime'][0]
+            host.setRecTime(rectime)
+        except:
+            pass
+        try:
+            loadave=nodes[node]['status']['loadave'][0]
+            host.setLoadAve(loadave)
+        except:
+            pass
+        try:
+            netload=nodes[node]['status']['netload'][0]
+            host.setNetLoad(netload)
+        except:
+            pass
+
         Hosts[host.Name] = host
 
 if __name__ == '__main__':

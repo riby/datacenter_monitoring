@@ -4,6 +4,7 @@ import GangliaStatus
 from flask import Response
 import fabfile as fb
 import TorqueStatus as TS
+import time
 Hosts={}
 
 app = Flask(__name__)
@@ -17,14 +18,20 @@ def test_server():
 def get_nagios_data(device):
     #device='compute_nodes'
     #if Hosts=={}:
+    upper_id={"compute_nodes":"Timestamp,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }   
+
     fb.getValue()
     Hosts=fb.Hosts
     data=Hosts[device]
     dict_return={}
+    #print upper_id["compute_nodes"]
+    dict_return[device]=upper_id[device]
     count=0
     for line in data:
         l=line.split(',')
-	dict_return[l[1]]=l[0]+','+','.join(l[2:])
+	swap_free=l[5].split('MB')[0].split('(')[1].strip()
+	swap_total=l[5].split('MB')[1].split('of')[1].strip()
+	dict_return[l[1]]=str(l[2])+","+str(l[4])+","+str(swap_free)+","+str(swap_total)+","+str(l[7])+","+str(l[10])+","+str(l[13])+","+str(l[16])+","+str(l[19])
     #print len(dict_return)
     #return "hello"
     return jsonify(dict_return)
@@ -36,12 +43,15 @@ def get_torque_data():
     lst=[]
     dct=dict()
     Hosts=TS.Hosts
-    dct['Host']='State,Slots,SlotsUsed,Jobs,AvailMem,TotalMem'
+    dct['Host']='State,Slots,SlotsUsed,AvailMem(MB),TotalMem(MB)or Swap,Time_Last_Rec,LoadAve,NetLoad(MB)'
+    Job_State_Dict={"free":1,'job-exclusive':2,'job-sharing':3,'offline':4,'reserve':5,'time-shared':6,'unknown':7}
     for h in Hosts.values():
-	l1=(str(h.State[0])+","+str(h.Slots)+","+str(h.SlotsUsed)+","+str(h.Jobs)+","+str(h.AvailMem)+","+str(h.TotalMem))# last is memory used
+	#data is cleaned ,clean JOB list(not Required)
+	t=round(time.time()-int(h.RecTime),2)
+	l1=(str(Job_State_Dict[h.State[0]])+","+str(h.Slots)+","+str(h.SlotsUsed)+","+str(round(float(h.AvailMem[0:-2])/1024,2))+","+str(round(float(h.TotalMem[0:-2])/1024,2))+','+str(t)+","+str(h.LoadAve)+","+str(round(float(h.NetLoad)/(1024*1024),2)))
 	dct[h.Name]=l1
                 #lst.append(dict)    
-    print dct
+    #print dct
     return jsonify(dct)
 
 
@@ -53,15 +63,15 @@ def get_ganglia_data():
     lst=[]
     dct=dict()
     Hosts=GangliaStatus.Hosts
-    dct['hosts']='IP,Swap_Total,Swap_Free,Swap_Used,Proc_Run,Cpu_User,Cpu_Wio'
+    dct['aahosts']='Swap_Total,Swap_Free,Swap_Used,Proc_Run,Cpu_User,Cpu_Wio,Load_One,Load,Five,Load_Fifteen,Mem_Cached,Mem_Total,Disk_Total,Disk_Free'
     for h in Hosts.values():
         if h.Swap_Free !=None:
     #            print h.Name, h.IP, h.Reported, h.Swap_Total,h.Swap_Free,(h.Swap_Total-h.Swap_Free)
 		#lst.append(h.Name+","+ str(h.IP)+","+str(h.Swap_Total)+","+str(h.Swap_Free)+","+str(h.Swap_Total-h.Swap_Free))
-		l1=(str(h.IP)+","+str(h.Swap_Total)+","+str(h.Swap_Free)+","+str(h.Swap_Total-h.Swap_Free)+","+str(h.Proc_Run)+","+str(h.Cpu_User)+","+str(h.Cpu_Wio))
+		l1=(str(round((h.Swap_Total)/1024,2))+","+str(round((h.Swap_Free)/1024,2))+","+str(round(h.Swap_Total/1024-h.Swap_Free/1024,2))+","+str(h.Proc_Run)+","+str(h.Cpu_User)+","+str(h.Cpu_Wio)+','+str(h.Load_Five)+','+str(h.Load_Fifteen)+','+str(h.Mem_Cached)+','+str(h.Mem_Total)+','+str(h.Disk_Total)+','+str(h.Disk_Free))
 		dct[h.Name]=l1
 		#lst.append(dict)    
-    print dct
+    #print dct
     return jsonify(dct) 
     #return Response(json.dumps(dct),  mimetype='application/json')
 if __name__ == '__main__':

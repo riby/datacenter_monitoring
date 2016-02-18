@@ -19,13 +19,20 @@ class GangliaHost:
         self.Name = name
         self.IP = None
         self.Reported = None
-        self.Load = None
+#        self.Load = None
 	self.Swap_Free = None
 	self.Swap_Total = None
 	self.Proc_Run = None
-	#self.Cpu_System = None
+	self.Cpu_Aidle = None
 	self.Cpu_User = None
 	self.Cpu_Wio = None
+	self.Load_One = None
+	self.Load_Five = None
+	self.Load_Fifteen = None
+	self.Mem_Cached = None
+	self.Mem_Total= None
+	self.Disk_Total = None
+	self.Disk_Free = None
  
         
     def setIP(self,s): self.IP=s
@@ -37,7 +44,13 @@ class GangliaHost:
     def setCpu_User(self,s): self.Cpu_User = s
     def setCpu_Wio(self,s): self.Cpu_Wio = s
     def getState(self,s): return self.State
-
+    def setLoad_One(self,s): self.Load_One = s
+    def setLoad_Five(self,s): self.Load_Five = s
+    def setLoad_Fifteen(self,s): self.Load_Fifteen = s
+    def setMem_Cached(self,s): self.Mem_Cached = s
+    def setMem_Total(self,s): self.Mem_Total = s
+    def setDisk_Total(self,s): self.Disk_Total = s
+    def setDisk_Free(self,s): self.Disk_Free = s
     #
     # Generate the HTML summary status for the host including a link to node's
     # Ganglia page
@@ -118,7 +131,7 @@ def getData(GMONDHost):
         #
         for metric in elem:
             if metric.attrib['NAME'] == 'load_one':
-                host.setLoad(float(metric.attrib['VAL']))
+                host.setLoad_One(float(metric.attrib['VAL']))
                 #break
 	    elif metric.attrib['NAME'] == 'swap_free':
 		host.setSwap_Free(float(metric.attrib['VAL']))
@@ -130,6 +143,18 @@ def getData(GMONDHost):
                 host.setCpu_User(float(metric.attrib['VAL']))
             elif metric.attrib['NAME'] == 'cpu_wio':
                 host.setCpu_Wio(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'load_five':
+                host.setLoad_Five(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'load_fifteen':
+                host.setLoad_Fifteen(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'mem_cached':
+                host.setMem_Cached(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'mem_total':
+                host.setMem_Total(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'disk_total':
+                host.setDisk_Total(float(metric.attrib['VAL']))
+            elif metric.attrib['NAME'] == 'disk_free':
+                host.setDisk_Free(float(metric.attrib['VAL']))
 #def setProc_Run(self,s): self.Proc_Run = s
 #    def setCpu_User(self,s): self.Cpu_User = s
 #    def setCpu_Wio(self,s): self.Cpu_Wio = s
