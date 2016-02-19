@@ -18,8 +18,8 @@ def test_server():
 def get_nagios_data(device):
     #device='compute_nodes'
     #if Hosts=={}:
-    upper_id={"compute_nodes":"Timestamp,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }   
-
+    #upper_id={"compute_nodes":"Status,Swap_State,Swap_Free,Swap_Total,IPMI_State,,FreeSpace_State,CVMFS-OSG_State,CVMFS-CERN_State,CVMFS-CONDB_State","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }   
+    upper_id={"compute_nodes":"Timestamp,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }
     fb.getValue()
     Hosts=fb.Hosts
     data=Hosts[device]
@@ -29,9 +29,14 @@ def get_nagios_data(device):
     count=0
     for line in data:
         l=line.split(',')
-	swap_free=l[5].split('MB')[0].split('(')[1].strip()
-	swap_total=l[5].split('MB')[1].split('of')[1].strip()
-	dict_return[l[1]]=str(l[2])+","+str(l[4])+","+str(swap_free)+","+str(swap_total)+","+str(l[7])+","+str(l[10])+","+str(l[13])+","+str(l[16])+","+str(l[19])
+	#if "OK" in l[5]:
+	#	swap_free=l[5].split('MB')[0].split('(')[1].strip()
+	#	swap_total=l[5].split('MB')[1].split('of')[1].strip()
+	#else:
+	#	swap_free=l[5]
+	#	swap_total=0
+	#dict_return[l[1]]=str(l[2])+","+str(l[4])+","+str(swap_free)+","+str(swap_total)+","+str(l[8])+","+str(l[7])+","+str(l[11])+","+str(l[10])+","+str(l[14])+","+str(l[13])+","+str(l[17])+","+str(l[16])+","+str(l[20])+","+str(l[19])
+	dict_return[l[1]]=','.join(l[2:])
     #print len(dict_return)
     #return "hello"
     return jsonify(dict_return)
