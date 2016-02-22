@@ -34,9 +34,9 @@ for k in keys:
 
 	data[k]=(zip(ganglia_header,ganglia_data[k].split(',')))+(zip(torque_header,torque_data[k].split(',')))+(zip(nagios_header,nagios_data[k].split(',')))
 	#print (data)
-	if count==2:
-		break
-	count=count+1
+#	if count==2:
+#		break
+#	count=count+1
 post={"date":datetime.datetime.utcnow(),
 		"data":data}
 print post
