@@ -50,7 +50,7 @@ print X
 print y
 
 
-# from matplotlib import pyplot as plt
+from matplotlib import pyplot as plt
 import numpy as np
 # import math
 
@@ -87,22 +87,78 @@ print X_std
 
 from sklearn.decomposition import PCA as sklearnPCA
 sklearn_pca = sklearnPCA(n_components=2)
-#sklearn_pca.components_
 Y_sklearn 	= sklearn_pca.fit_transform(X_std)
 
 
+x_corr=[]
+y_corr=[]
+label=[]
+# print Y_sklearn
+
+x_l=[]
+y_l=[]
+for lab in machine:
+	x_l.append(Y_sklearn[y==lab, 0].tolist())
+	y_l.append(Y_sklearn[y==lab, 1].tolist())
+
+for x in x_l:
+	for x1 in x:
+		x_corr.append(x1)
+
+for y in y_l:
+	for y1 in y:
+		y_corr.append(y1)
+l=len(x_l[0])
+
+for lab in machine:
+	for i in [lab for x in range(0,l)]:
+		label.append(i)
+#print x_corr
+#print y_corr
+#print label
+#exit(0)
+
+#new_list=[]
+
+new_arr=np.array(zip(x_corr,y_corr))
+
 #df_snp_pca = pd.DataFrame(df_snp_pca, 
 #                columns=['PC' + str(x) for x in range(1, n_components+1)], 
-## from sklearn.cluster import KMeans
-# from sklearn import datasets
-# k_means=KMeans(n_clusters=2)
-# k_means.fit(X)
+from sklearn.cluster import KMeans
+from sklearn import datasets
+k_means=KMeans(n_clusters=5)
+k_means.fit(new_arr)
 
-# centroid=k_means.cluster_centers_
-# labels=k_means.labels_
+centroid=k_means.cluster_centers_
+labels=k_means.labels_
+
+colors=["g.","r.","c.","y.","b."]
+# for lab in set(machine):
+#     for l in Y_sklearn[y==lab,0]:
+#             x_l.append(l)
+#     for l in Y_sklearn[y==lab,1]:
+#             y_l.append(l)
+#             lb.append(lab)
+# label_lst=[]
+# for lab, col in zip(set(machine),
+#                         RGB_tuples):
+# 	scatter = ax.scatter(Y_sklearn[y==lab, 0],
+# 							Y_sklearn[y==lab, 1],
+#             	         c=col,label=lab)
+# 	#label_lst.append([lab]*Y_sklearn[y==lab, 0].size)
+# 	#label_lst.append(lab)
+
+for i in range(len(new_arr)):
+	#print("coordinate:",new_arr[i], "Label:",label[i])
+	plt.plot(new_arr[i][0],new_arr[i][1],colors[labels[i]], markersize=10)
 
 
+plt.scatter(centroid[:,0],centroid[:,1],marker='x',s=200,linewidths=5,zorder=10)
 
+plt.show()
+#xit(0)
+
+exit(0)
 import colorsys
 #size from machine
 
