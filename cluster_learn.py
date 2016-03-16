@@ -9,7 +9,10 @@ def getData_N_Min(t):
 	cursor=db.data.find({'date':{"$gte": date1}})
 	return cursor
 
-n_times=getData_N_Min(100)
+n_times=getData_N_Min(40)
+if n_times.count()==0:
+	print "No Data"
+	exit(1)
 data=dict()
 t=0
 data=[]
@@ -108,11 +111,16 @@ for x in x_l:
 for y in y_l:
 	for y1 in y:
 		y_corr.append(y1)
+
 l=len(x_l[0])
 
 for lab in machine:
 	for i in [lab for x in range(0,l)]:
 		label.append(i)
+
+
+
+
 #print x_corr
 #print y_corr
 #print label
@@ -125,14 +133,68 @@ new_arr=np.array(zip(x_corr,y_corr))
 #df_snp_pca = pd.DataFrame(df_snp_pca, 
 #                columns=['PC' + str(x) for x in range(1, n_components+1)], 
 from sklearn.cluster import KMeans
-from sklearn import datasets
+#from sklearn import datasets
+
 k_means=KMeans(n_clusters=5)
 k_means.fit(new_arr)
 
 centroid=k_means.cluster_centers_
 labels=k_means.labels_
 
-colors=["g.","r.","c.","y.","b."]
+colors=["green","red","cyan","yellow","blue"]
+
+color_src=[]
+
+
+
+for i in range(len(x_corr)):
+	color_src.append(colors[labels[i]])
+
+
+
+from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.models import HoverTool#,BoxZoomTool, ResetTool,ResizeTool,WheelZoomTool
+
+output_file("toolbar.html")
+TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,tap,previewsave,box_select,poly_select,lasso_select"
+
+source = ColumnDataSource(
+        data=dict(
+            x=x_corr,
+            y=y_corr,
+            desc=label,
+           # colors=color_src,
+            
+        )
+    )
+hover = HoverTool(
+        tooltips="""
+        <div>
+            
+            <div>
+                <span style="font-size: 17px; font-weight: bold;">@desc</span>
+                <span style="font-size: 15px; color: #966;">[$index]</span>
+            </div>
+            <div>
+                <span style="font-size: 15px;">Location</span>
+                <span style="font-size: 10px; color: #696;">($x, $y)</span>
+            </div>
+        </div>
+        """
+    )
+#TOOLS= [BoxZoomTool(), ResetTool(),hover,ResizeTool(),WheelZoomTool()]
+
+TOOLS=["pan,wheel_zoom,box_zoom,reset,resize",hover]
+p = figure(plot_width=1000, plot_height=1000, tools=TOOLS,
+           title="Mouse over the dots")
+
+p.circle('x', 'y', size=30, source=source,fill_color=color_src)
+p.scatter(centroid[:,0],centroid[:,1], color='black')#,s=200,linewidths=5,zorder=10)
+
+show(p)
+
+exit(0)
+
 # for lab in set(machine):
 #     for l in Y_sklearn[y==lab,0]:
 #             x_l.append(l)

@@ -10,6 +10,9 @@ def getData_N_Min(t):
 	return cursor
 
 n_times=getData_N_Min(100)
+if n_times.count()==0:
+	print "No Data"
+	exit(1)
 data=dict()
 t=0
 data=[]
@@ -30,172 +33,75 @@ for t1 in n_times:
 	#break
 	t=t+1
 
-print data
+#print data
 #exit(0)
+res=['Device','G_Swap_Total', 'G_Swap_Free', 'G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'G_Mem_Total', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_TotalMem(MB)/Swap', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+att=['G_Swap_Used','G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_AvailMem(MB)', 'T_LoadAve', 'T_NetLoad(MB)']
+
+new_att=['Device','G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+new_index=[]
+full_index=[]
+
+for a in att:
+    new_index.append(res.index(a))
+
+for i in new_att:
+    full_index.append(res.index(i))
+
+
+new_data=[]
+
+for d in data:
+    core_count=int(d[15])
+    if core_count!=0:
+        for i in new_index:
+            d[i]=round(float(d[i])/core_count,2)
+            d[i]=unicode(d[i])
+    tmp=[]
+    tmp=[d[i] for i in full_index]
+    new_data.append(tmp)
+
+
 
 import pandas as pd
 
-df=pd.DataFrame(data)
+df=pd.DataFrame(new_data)
 print df
 
-df.columns=['Device','G_Swap_Total', 'G_Swap_Free', 'G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'G_Mem_Total', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_TotalMem(MB)/Swap', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+df.columns=['Device','G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
 
-print df
+#print df
 #exit(0)
 
-X = df.ix[:,1:21].values
+X = df.ix[:,1:17].values
 y = df.ix[:,0].values
 
-print X
-print y
+#print X
+#print y
 
 
-from matplotlib import pyplot as plt
+#from matplotlib import pyplot as plt
 import numpy as np
-# import math
 
-
-# label_dict = {1: 'compute-4-34',
-#               2: 'compute-5-35',
-#               3: 'compute-13-14'}
 
 # feature_dict = {0: 'G_Swap_Total', 1: 'G_Swap_Free', 2: 'G_Swap_Used', 3: 'G_Proc_Run', 4: 'G_Cpu_User', 5: 'G_Cpu_Wio', 6: 'G_Load_One', 7: 'G_Load', 
 # 8: 'G_Five', 9: 'G_Load_Fifteen', 10: 'G_Mem_Cached', 11: 'G_Mem_Total', 12: 'T_State', 13: 'T_Slots', 14: 'T_SlotsUsed', 15: 'T_AvailMem(MB)', 16: 'T_TotalMem(MB)/Swap', 17: 'T_Time_Last_Rec', 18: 'T_LoadAve', 19: 'T_NetLoad(MB)'}
 
-# with plt.style.context('seaborn-whitegrid'):
-#     plt.figure(figsize=(8, 6))
-#     for cnt in range(20):
-#         plt.subplot(2, 2, cnt+1)
-#         for lab in ('compute-4-34', 'compute-5-35', 'compute-13-14'):
-#             plt.hist(X[y==lab, cnt],
-#                      label=lab,
-#                      bins=10,
-#                      alpha=0.3,)
-#         plt.xlabel(feature_dict[cnt])
-#     plt.legend(loc='upper right', fancybox=True, fontsize=8)
-
-#     plt.tight_layout()
-#     plt.show()
-
-
-	#break
 from sklearn.preprocessing import StandardScaler
 X_std = StandardScaler().fit_transform(X)
-
-print X_std
 
 
 
 
 from sklearn.decomposition import PCA as sklearnPCA
 sklearn_pca = sklearnPCA(n_components=2)
-#sklearn_pca.components_]
 Y_sklearn 	= sklearn_pca.fit_transform(X_std)
-#pca_score = sklearnPCA.explained_variance_ratio_
-#V = sklearnPCA.components_
 
-#print v
-
-
-#df_snp_pca = pd.DataFrame(df_snp_pca, 
-#                columns=['PC' + str(x) for x in range(1, n_components+1)], 
-## from sklearn.cluster import KMeans
-# from sklearn import datasets
-# k_means=KMeans(n_clusters=2)
-# k_means.fit(X)
-
-# centroid=k_means.cluster_centers_
-# labels=k_means.labels_
-
-
-
-import colorsys
-#size from machine
-
-N =len(machine) 
-HSV_tuples = [(x*1.0/N, 0.5, 0.5) for x in range(N)]
-RGB_tuples = map(lambda x: colorsys.hsv_to_rgb(*x), HSV_tuples)
-
-
-# with plt.style.context('seaborn-whitegrid'):
-#     plt.figure(figsize=(6, 4))
-#     for lab, col in zip(set(machine),
-#                         RGB_tuples):
-#         plt.scatter(Y_sklearn[y==lab, 0],
-#                     Y_sklearn[y==lab, 1],
-#                     label=lab,
-#                     c=col)
-#     plt.xlabel('Principal Component 1')
-#     plt.ylabel('Principal Component 2')
-#     plt.legend(loc='lower center')
-#     plt.tight_layout()
-#     plt.show()
-
-# if 1: # picking on a scatter plot (matplotlib.collections.RegularPolyCollection)
-
-#     #x, y, c, s = rand(4, 100)
-#     def onpick3(event):
-#         ind = event.ind
-#         #for lab in machine:
-#         print 'onpick3 scatter:', ind,event.artist.get_text()#, np.take(Y_sklearn[y==lab, 0], ind), np.take(Y_sklearn[y==lab, 1], ind)
-
-#     fig=plt.figure()
-#     ax1 = fig.add_subplot(111)
-#     #col = ax1.scatter(x, y, 100*s, c, picker=True)
-#     for lab, col in zip(set(machine),
-#                         RGB_tuples):
-#         plt.scatter(Y_sklearn[y==lab, 0],
-#                     Y_sklearn[y==lab, 1],
-#                     label=lab,
-#                     c=col,picker=True)
-#     plt.xlabel('Principal Component 1')
-#     plt.ylabel('Principal Component 2')
-#    # plt.legend(loc='lower center')
-#     #fig.savefig('pscoll.eps')
-#     fig.canvas.mpl_connect('pick_event', onpick3)
-
-# plt.show()
-
-
-# import matplotlib.pyplot as plt
-# import numpy as np
-# import mpld3
-
-#fig, ax = plt.subplots(subplot_kw=dict(axisbg='#EEEEEE'))
-
-# for lab in set(machine):
-#     for l in Y_sklearn[y==lab,0]:
-#             x_l.append(l)
-#     for l in Y_sklearn[y==lab,1]:
-#             y_l.append(l)
-#             lb.append(lab)
-# label_lst=[]
-# for lab, col in zip(set(machine),
-#                         RGB_tuples):
-# 	scatter = ax.scatter(Y_sklearn[y==lab, 0],
-# 							Y_sklearn[y==lab, 1],
-#             	         c=col,label=lab)
-# 	#label_lst.append([lab]*Y_sklearn[y==lab, 0].size)
-# 	#label_lst.append(lab)
-
-# ax.grid(color='white', linestyle='solid')
-# ax.set_title("Scatter Plot (with tooltips!)", size=20)
-
-# labels = machine
-# tooltip = mpld3.plugins.PointLabelTooltip(scatter)
-# mpld3.plugins.connect(fig, tooltip)
-
-# mpld3.show()
-
-# output_file("toolbar.html")
-
-from bokeh.plotting import figure, output_file, show, ColumnDataSource
-from bokeh.models import HoverTool
 
 x_corr=[]
 y_corr=[]
 label=[]
-# print Y_sklearn
+
 
 x_l=[]
 y_l=[]
@@ -210,31 +116,83 @@ for x in x_l:
 for y in y_l:
 	for y1 in y:
 		y_corr.append(y1)
+
 l=len(x_l[0])
 
 for lab in machine:
 	for i in [lab for x in range(0,l)]:
 		label.append(i)
 
-print len(x_corr)
-print len(y_corr)
-print len(label)
-#exit(0)
 
-# for lab in machine:
-# 	x_corr.append(Y_sklearn[y==lab, 0])
-# 	y_corr.append(Y_sklearn[y==lab,1])
+new_arr=np.array(zip(x_corr,y_corr))
+
+#df_snp_pca = pd.DataFrame(df_snp_pca, 
+#                columns=['PC' + str(x) for x in range(1, n_components+1)], 
+from sklearn.cluster import KMeans
+#from sklearn import datasets
 	
-# 	for l in [lab for x in range(0,l)]:
-# 		label.append(l)
+k_means=KMeans(n_clusters=2)
+k_means.fit(new_arr)
+
+centroid=k_means.cluster_centers_
+labels=k_means.labels_
+
+
+colors=["green","red","cyan","yellow","blue"]
+
+color_src=[]
+
+groups_color={"green":set(),
+			   "red":set(),
+			   "cyan":set(),
+			   "yellow":set(),
+			   "blue":set()}
+
+for i in range(len(x_corr)):
+	color_src.append(colors[labels[i]])
+	groups_color[colors[labels[i]]].add(label[i])
+
+print groups_color
+red_lst=[]
+ms=0
+f=open("color_cluster.csv",'w+')
+f.write('Color1,Color2,'+','.join(df.columns)+'\n')
+
+for d in new_data:
+	color_label=[]
+	if d[0] in groups_color['red']:
+		color_label.append('red')
+	if d[0] in groups_color['green']:
+		color_label.append('green')
+	if d[0] in groups_color['yellow']:
+		color_label.append('yellow')
+	if d[0] in groups_color['blue']:
+		color_label.append('blue')
+	if d[0] in groups_color['cyan']:
+		color_label.append('cyan')	
+	if ms<len(color_label):
+		ms=len(color_label)
+	if len(color_label)==1:
+		color_label.append("None")
+	f.write(','.join(color_label)+","+(','.join(d)+"\n"))	
+
+print "Max Color"+str(ms)
+
+exit(1)
+
+
+from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.models import HoverTool#,BoxZoomTool, ResetTool,ResizeTool,WheelZoomTool
 
 output_file("toolbar.html")
+TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,tap,previewsave,box_select,poly_select,lasso_select"
 
 source = ColumnDataSource(
         data=dict(
             x=x_corr,
             y=y_corr,
             desc=label,
+           # colors=color_src,
             
         )
     )
@@ -253,36 +211,16 @@ hover = HoverTool(
         </div>
         """
     )
+#TOOLS= [BoxZoomTool(), ResetTool(),hover,ResizeTool(),WheelZoomTool()]
 
-p = figure(plot_width=800, plot_height=800, tools=[hover],
+TOOLS=["pan,wheel_zoom,box_zoom,reset,resize",hover]
+p = figure(plot_width=1000, plot_height=1000, tools=TOOLS,
            title="Mouse over the dots")
 
-p.circle('x', 'y', size=10, source=source)
+p.circle('x', 'y', size=30, source=source,fill_color=color_src)
+p.scatter(centroid[:,0],centroid[:,1], color='black')#,s=200,linewidths=5,zorder=10)
 
 show(p)
 
-
-
-
-# from numpy.random import rand
-
-# print str(N)+" Length"
-
-# if 1: # picking on a scatter plot (matplotlib.collections.RegularPolyCollection)
-
-#     c, s = rand(2, 100)
-#     def onpick3(event):
-#         ind = event.ind
-#         print 'onpick3 scatter:', ind,event#.pickx,event.picky#, machine[ind] #, npy.take(x, ind), npy.take(y, ind)
-
-#     fig = plt.figure()
-#     ax1 = fig.add_subplot(111)
-#     for lab, col in zip(set(machine),('red','blue','yellow','green','black','brown')):
-#     	col = ax1.scatter(Y_sklearn[y==lab, 0],
-#                     Y_sklearn[y==lab, 1], label=lab, c=col, picker=True)
-#     #fig.savefig('pscoll.eps')
-#     plt.legend(loc='lower center')
-#     fig.canvas.mpl_connect('pick_event', onpick3)
-
-# plt.show()
+exit(0)
 

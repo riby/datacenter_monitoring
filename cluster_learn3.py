@@ -9,7 +9,10 @@ def getData_N_Min(t):
 	cursor=db.data.find({'date':{"$gte": date1}})
 	return cursor
 
-n_times=getData_N_Min(100)
+n_times=getData_N_Min(5)
+if n_times.count()==0:
+	print "No Data"
+	exit(1)
 data=dict()
 t=0
 data=[]
@@ -33,17 +36,53 @@ for t1 in n_times:
 print data
 #exit(0)
 
+res=['Device','G_Swap_Total', 'G_Swap_Free', 'G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'G_Mem_Total', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_TotalMem(MB)/Swap', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+att=['G_Swap_Used','G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_AvailMem(MB)', 'T_LoadAve', 'T_NetLoad(MB)']
+
+new_att=['Device','G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+new_index=[]
+full_index=[]
+
+for a in att:
+    new_index.append(res.index(a))
+
+for i in new_att:
+    full_index.append(res.index(i))
+
+
+new_data=[]
+
+# for d in data:
+#     core_count=int(d[15])
+#     if core_count!=0:
+#         for i in new_index:
+#             d[i]=round(float(d[i])/core_count,2)
+#             d[i]=unicode(d[i])
+#     tmp=[]
+#     tmp=[d[i] for i in full_index]
+#     new_data.append(tmp)
+for d in data:
+    core_count=int(d[14])
+    if core_count!=0:
+        for i in new_index:
+            d[i]=round(float(d[i])/core_count,2)
+            d[i]=unicode(d[i])
+    tmp=[]
+    tmp=[d[i] for i in full_index]
+    new_data.append(tmp)
+
+
 import pandas as pd
 
-df=pd.DataFrame(data)
+df=pd.DataFrame(new_data)
 print df
 
-df.columns=['Device','G_Swap_Total', 'G_Swap_Free', 'G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'G_Mem_Total', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_TotalMem(MB)/Swap', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+df.columns=['Device','G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
 
 print df
 #exit(0)
 
-X = df.ix[:,1:21].values
+X = df.ix[:,1:17].values
 y = df.ix[:,0].values
 
 print X
@@ -85,30 +124,139 @@ X_std = StandardScaler().fit_transform(X)
 print X_std
 
 
-
-
 from sklearn.decomposition import PCA as sklearnPCA
 sklearn_pca = sklearnPCA(n_components=2)
-#sklearn_pca.components_]
 Y_sklearn 	= sklearn_pca.fit_transform(X_std)
-#pca_score = sklearnPCA.explained_variance_ratio_
-#V = sklearnPCA.components_
 
-#print v
 
+x_corr=[]
+y_corr=[]
+label=[]
+# print Y_sklearn
+
+x_l=[]
+y_l=[]
+for lab in machine:
+	x_l.append(Y_sklearn[y==lab, 0].tolist())
+	y_l.append(Y_sklearn[y==lab, 1].tolist())
+
+for x in x_l:
+	for x1 in x:
+		x_corr.append(x1)
+
+for y in y_l:
+	for y1 in y:
+		y_corr.append(y1)
+
+l=len(x_l[0])
+
+for lab in machine:
+	for i in [lab for x in range(0,l)]:
+		label.append(i)
+
+
+
+
+#print x_corr
+#print y_corr
+#print label
+#exit(0)
+
+#new_list=[]
+
+new_arr=np.array(zip(x_corr,y_corr))
 
 #df_snp_pca = pd.DataFrame(df_snp_pca, 
 #                columns=['PC' + str(x) for x in range(1, n_components+1)], 
-## from sklearn.cluster import KMeans
-# from sklearn import datasets
-# k_means=KMeans(n_clusters=2)
-# k_means.fit(X)
+from sklearn.cluster import KMeans
+#from sklearn import datasets
 
-# centroid=k_means.cluster_centers_
-# labels=k_means.labels_
+k_means=KMeans(n_clusters=4)
+k_means.fit(new_arr)
+
+centroid=k_means.cluster_centers_
+labels=k_means.labels_
+
+colors=["green","red","cyan","yellow","blue"]
+
+color_src=[]
 
 
 
+for i in range(len(x_corr)):
+	color_src.append(colors[labels[i]])
+
+
+
+from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.models import HoverTool#,BoxZoomTool, ResetTool,ResizeTool,WheelZoomTool
+
+output_file("toolbar.html")
+TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,tap,previewsave,box_select,poly_select,lasso_select"
+
+source = ColumnDataSource(
+        data=dict(
+            x=x_corr,
+            y=y_corr,
+            desc=label,
+           # colors=color_src,
+            
+        )
+    )
+hover = HoverTool(
+        tooltips="""
+        <div>
+            
+            <div>
+                <span style="font-size: 17px; font-weight: bold;">@desc</span>
+                <span style="font-size: 15px; color: #966;">[$index]</span>
+            </div>
+            <div>
+                <span style="font-size: 15px;">Location</span>
+                <span style="font-size: 10px; color: #696;">($x, $y)</span>
+            </div>
+        </div>
+        """
+    )
+#TOOLS= [BoxZoomTool(), ResetTool(),hover,ResizeTool(),WheelZoomTool()]
+
+TOOLS=["pan,wheel_zoom,box_zoom,reset,resize",hover]
+p = figure(plot_width=1000, plot_height=1000, tools=TOOLS,
+           title="Mouse over the dots")
+
+p.circle('x', 'y', size=30, source=source,fill_color=color_src)
+p.scatter(centroid[:,0],centroid[:,1], color='black')#,s=200,linewidths=5,zorder=10)
+
+show(p)
+
+exit(0)
+
+# for lab in set(machine):
+#     for l in Y_sklearn[y==lab,0]:
+#             x_l.append(l)
+#     for l in Y_sklearn[y==lab,1]:
+#             y_l.append(l)
+#             lb.append(lab)
+# label_lst=[]
+# for lab, col in zip(set(machine),
+#                         RGB_tuples):
+# 	scatter = ax.scatter(Y_sklearn[y==lab, 0],
+# 							Y_sklearn[y==lab, 1],
+#             	         c=col,label=lab)
+# 	#label_lst.append([lab]*Y_sklearn[y==lab, 0].size)
+# 	#label_lst.append(lab)
+
+for i in range(len(new_arr)):
+	#print("coordinate:",new_arr[i], "Label:",label[i])
+	plt.plot(new_arr[i][0],new_arr[i][1],colors[labels[i]], markersize=10)
+
+
+plt.scatter(centroid[:,0],centroid[:,1],marker='x',s=200,linewidths=5,zorder=10)
+
+plt.show()
+#xit(0)
+
+exit(0)
 import colorsys
 #size from machine
 
@@ -257,7 +405,7 @@ hover = HoverTool(
 p = figure(plot_width=800, plot_height=800, tools=[hover],
            title="Mouse over the dots")
 
-p.circle('x', 'y', size=10, source=source)
+p.circle('x', 'y', size=50, source=source)
 
 show(p)
 

@@ -29,9 +29,26 @@ ganglia_header="G_Swap_Total,G_Swap_Free,G_Swap_Used,G_Proc_Run,G_Cpu_User,G_Cpu
 nagios_header="N_Status,N_Swap_Service,N_Swap_State,N_Swap_Info,N_IPMI_Service,N_IPMI_State,N_IPMI_Info,N_FreeSpace_Service,N_FreeSpace_State,N_FreeSpace_Info,N_CVMFS-OSG_Service,N_CVMFS-OSG_State,N_CVMFS-OSG_Info,N_CVMFS-CERN_Service,N_CVMFS-CERN_State,N_CVMFS-CERN_Info,N_CVMFS-CONDB_Service,N_CVMFS-CONDB_State,N_CVMFS-CONDB_Info".split(',')
 data={}
 count=0
+
+ganglia_att=['G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached']
+nagios_att=['T_SlotsUsed', 'T_AvailMem(MB)',  'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)']
+# index_ganglia=[]
+# index_nagios=[]
+# for g in ganglia_att:
+# 	index_ganglia.append(ganglia_header.index(g))
+
+# for n in nagios_att:
+# 	index_nagios.append(torque_header.index(n))
+
+
 for k in keys:
 	#if k in ganglia_data and k in torque_data:
-
+	#get Number of Cores
+	
+	# g_data=ganglia_data[k].split(',')
+	# t_data=torque_data[k].split(',')
+	# for gi in index_ganglia:
+	# 	g_data[gi]=
 	data[k]=(zip(ganglia_header,ganglia_data[k].split(',')))+(zip(torque_header,torque_data[k].split(',')))+(zip(nagios_header,nagios_data[k].split(',')))
 	#print (data)
 #	if count==2:
