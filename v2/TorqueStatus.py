@@ -98,8 +98,8 @@ def getData():
 
         Hosts[host.Name] = host
 
-if __name__ == '__main__':
-    getData()
+#if __name__ == '__main__':
+#    getData()
     #print Hosts.keys()
 #    for h in Hosts.values():
 #        print h.Name, h.State, h.Slots, h.SlotsUsed, h.Jobs

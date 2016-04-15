@@ -149,16 +149,16 @@ def getData(GMONDHost):
         #    switch CPU usage
         #    CRAC issues
 
-if __name__ == '__main__':
+#if __name__ == '__main__':
     # For testing service assume this machine has a gmond that listens
-    import sys
+#    import sys
 
-    if len(sys.argv) > 1:
-        host=sys.argv[1]
-    else:
-        host='localhost'
+#    if len(sys.argv) > 1:
+#        host=sys.argv[1]
+#    else:
+#        host='localhost'
 
-    getData(host)
+#    getData(host)
     #for h in Hosts.values():
 #	if h.Swap_Free !=None:
 #        	print h.Name, h.IP, h.Reported, now-h.Reported,h.Swap_Total,h.Swap_Free,(h.Swap_Total-h.Swap_Free)
