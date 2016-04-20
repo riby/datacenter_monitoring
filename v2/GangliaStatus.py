@@ -1,7 +1,6 @@
 #!/usr/bin/python
 #
-# Module to talk with a gmond and determine what hosts are reporting
-# and some basic information
+#
 import socket
 import xml.etree.cElementTree as ET
 import time
@@ -14,24 +13,24 @@ Hosts={}
 #  Interested in Name, IP address, The last reported time and the load_one value
 #
 class GangliaHost:
-    # What are we interested in for ganglia metrics?
+    # Binding all Host information to the object of machine
     def __init__(self,name):       
-        self.Name = name
-        self.IP = None
-        self.Reported = None
-	self.Swap_Free = None
-	self.Swap_Total = None
-	self.Proc_Run = None
-	self.Cpu_Aidle = None
-	self.Cpu_User = None
-	self.Cpu_Wio = None
-	self.Load_One = None
-	self.Load_Five = None
-	self.Load_Fifteen = None
-	self.Mem_Cached = None
-	self.Mem_Total= None
-	self.Disk_Total = None
-	self.Disk_Free = None
+    self.Name = name           # Name of the Host
+    self.IP = None
+    self.Reported = None
+	self.Swap_Free = None      # Amount of free swap space
+	self.Swap_Total = None     # Amount of total swap space
+	self.Proc_Run = None       # Number of running processes
+	self.Cpu_Aidle = None      # Percentage of CPU cycles spent idle since last boot 
+	self.Cpu_User = None       # Percentage of CPU cycles spent in user mode
+	self.Cpu_Wio = None        # Percentage of CPU cycles spent waiting for I/O 
+	self.Load_One = None       # Reported system load, averaged over one minute
+	self.Load_Five = None      # Reported system load, averaged over five minutes
+	self.Load_Fifteen = None   # Reported system load, averaged over fifteen minutes
+	self.Mem_Cached = None     # Amount of memory allocated to cached data 
+	self.Mem_Total= None       # Total amount of physical memory
+	self.Disk_Total = None     # Total capacity on the fullest local disk partition
+	self.Disk_Free = None      # Total free space on the fullest local disk partition
         
     def setIP(self,s): self.IP=s
     def setReported(self,s): self.Reported = s
@@ -115,7 +114,6 @@ def getData(GMONDHost):
         for metric in elem:
             if metric.attrib['NAME'] == 'load_one':
                 host.setLoad_One(float(metric.attrib['VAL']))
-                #break
 	    elif metric.attrib['NAME'] == 'swap_free':
 		host.setSwap_Free(float(metric.attrib['VAL']))
 	    elif metric.attrib['NAME'] == 'swap_total':
