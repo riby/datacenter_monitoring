@@ -4,3 +4,4 @@ log
 *fab
 *.json
 *.swp
+fabfile.py
