@@ -2,9 +2,13 @@ from fabric.api import run,hosts
 from fabric.context_managers import env
 from StringIO import StringIO
 from fabric.api import get
+import json
+
+with open('credentials.json') as data_file:
+    data = json.load(data_file)
 
 env.hosts = ['monitor']
-env.password = 'KXUb##doN6'
+env.password = data['password']
 
 Hosts={}
 class FileSshGet:
