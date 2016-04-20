@@ -15,9 +15,9 @@ Hosts={}
 class GangliaHost:
     # Binding all Host information to the object of machine
     def __init__(self,name):       
-    self.Name = name           # Name of the Host
-    self.IP = None
-    self.Reported = None
+	self.Name = name           # Name of the Host
+	self.IP = None
+	self.Reported = None
 	self.Swap_Free = None      # Amount of free swap space
 	self.Swap_Total = None     # Amount of total swap space
 	self.Proc_Run = None       # Number of running processes
