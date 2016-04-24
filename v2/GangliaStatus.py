@@ -62,11 +62,14 @@ def getData(GMONDHost):
     s.connect((GMONDHost, 8651))
     data=''
     while True:
-        buff = s.recv(4096)
-        if len(buff) == 0:
-            break
-        else:
-            data += buff
+        try:
+            buff = s.recv(4096)
+            if len(buff) == 0:
+                break
+            else:
+                data += buff
+        except socket.error, e:
+            print "Socket Error Occured"
     s.close()
     #
     #
