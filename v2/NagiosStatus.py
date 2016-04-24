@@ -179,6 +179,11 @@ if __name__ == '__main__':
     import sys
     import time
     import datetime
+    import os
+    #Path of script and config is same, we will extract the path from OS
+ 
+    SCRIPT_DIR=os.path.dirname(os.path.realpath(__file__))
+
     if len(sys.argv) > 1:
         pipe=sys.argv[1]
     else:
@@ -186,20 +191,22 @@ if __name__ == '__main__':
     # Need to allow arguments so that value can be added
     getData(pipe)
     l=Hosts.values()
-    #print l
+    
     print 'Hosts discovered:', len(Hosts)
 
     node=l[0]
     ts=time.time()
     timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
-    f=open('data.txt','w+')
-    f_storage=open('/cluster/home/rsidhu/code/storage_nodes.csv','w+')
-    f_compute=open('/cluster/home/rsidhu/code/compute_nodes.csv','w+')
-    f_switches=open("/cluster/home/rsidhu/code/switches.csv","w+")
 
-    #f_compute.write("Timestamp,Device_Name,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info\n")
-    #f_storage.write("Timestamp,Device_Name,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info\n")
-    #f_switches.write("Timestamp,Device_Name,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info\n")
+    f_storage=open(SCRIPT_DIR+'storage_nodes.csv','w+')
+    f_compute=open(SCRIPT_DIR+'compute_nodes.csv','w+')
+    f_switches=open(SCRIPT_DIR+"switches.csv","w+")
+    
+    #In case we need header information it is below for each segment of machines
+
+    #Compute: ("Timestamp,Device_Name,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info\n")
+    #Storage: ("Timestamp,Device_Name,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info\n")
+    #Switches: ("Timestamp,Device_Name,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info\n")
     for l1 in l:
 	st=""
         for s in l1.Services:
@@ -211,11 +218,4 @@ if __name__ == '__main__':
 		f_compute.write(timestamp+","+l1.Name+","+str(l1.State)+","+st+"\n")
 	elif group=="4032-switches" or group=="6248-switches":
 		f_switches.write(timestamp+","+l1.Name+","+str(l1.State)+","+st+"\n")
-     #   f.write(timestamp+","+''.join(l1.Group)+","+l1.Name+","+str(l1.State)+","+st+"\n")
-
-    #print "Name:", node.Name
-    #print "State:", node.State
-    #for s in node.Services:
-    #    print "Service:", s.Name
-    #    print "Status:", s.State
-    #    print "Info:", s.Info
+    print "Done Writing Files"
