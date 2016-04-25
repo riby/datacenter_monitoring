@@ -71,7 +71,7 @@ def getData(GMONDHost):
         except socket.error, e:
             print "Socket Error Occured"
     s.close()
-    #
+   
     #
     # This is really meant to be a backstop so that 
     # problems with parsing can be traced back to the buffer
