@@ -13,6 +13,8 @@ Hosts={}
 
 app = Flask(__name__)
 
+# We need to define headers from compute nodes, storage nodes and switches for future ease if attributes required for action
+upper_id={"compute_nodes":"Timestamp,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }
 
 @app.route('/', methods=['GET'])
 def test_server():
@@ -21,33 +23,25 @@ def test_server():
 def page_not_found(error):
     return render_template('page_not_found.html'), 4044
 
+@app.errorhandler(500)
+def internal_server_error(error):
+    app.logger.error('Server Error: %s', (error))
+    return render_template('500.html'), 500
+
+
 @app.route('/atlas/nagios/<string:device>',methods=['GET','POST'])
 def get_nagios_data(device):
-    #device='compute_nodes'
-    #if Hosts=={}:
-    #upper_id={"compute_nodes":"Status,Swap_State,Swap_Free,Swap_Total,IPMI_State,,FreeSpace_State,CVMFS-OSG_State,CVMFS-CERN_State,CVMFS-CONDB_State","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }   
-    upper_id={"compute_nodes":"Timestamp,Status,Swap_Service,Swap_State,Swap_Info,IPMI_Service,IPMI_State,IPMI_Info,FreeSpace_Service,FreeSpace_State,FreeSpace_Info,CVMFS-OSG_Service,CVMFS-OSG_State,CVMFS-OSG_Info,CVMFS-CERN_Service,CVMFS-CERN_State,CVMFS-CERN_Info,CVMFS-CONDB_Service,CVMFS-CONDB_State,CVMFS-CONDB_Info","storage_nodes":"Timestamp,Status,XrootD_Service,XrootD_State,XrootD_Info,OMReport_Service,OMReport_State,OMReport_Info","switches":"Timestamp,Status,PowerSupply_Service,PowerSupply_State,PowerSupply_Info,GlobalStatus_Service,GlobalStatus_State,GlobalStatus_Info,Fan_Service,Fan_State,Fan_Info" }
-    fb.run_on_host()
-    fb.getValue()
-    Hosts=fb.Hosts
-    data=Hosts[device]
+    #device can be 'compute_nodes' or 'storage_nodes' or 'switches': Depending on the variable passed
+    fb.run_on_host()	#Runs the file on Monitor machine to create snapshot of states of all machines
+    fb.getValue()	#Get value by extracting data received from Nagios	
+    data=fb.Hosts[device] #Extract the devices based on params
     dict_return={}
-    #print upper_id["compute_nodes"]
-    #dict_return[device]=upper_id[device]
-    count=0
+    ## Removal of extra attibutes from the data and set into dictionary
     for line in data:
         l=line.split(',')
-	#if "OK" in l[5]:
-	#	swap_free=l[5].split('MB')[0].split('(')[1].strip()
-	#	swap_total=l[5].split('MB')[1].split('of')[1].strip()
-	#else:
-	#	swap_free=l[5]
-	#	swap_total=0
-	#dict_return[l[1]]=str(l[2])+","+str(l[4])+","+str(swap_free)+","+str(swap_total)+","+str(l[8])+","+str(l[7])+","+str(l[11])+","+str(l[10])+","+str(l[14])+","+str(l[13])+","+str(l[17])+","+str(l[16])+","+str(l[20])+","+str(l[19])
 	dict_return[l[1]]=','.join(l[2:])
-    #print len(dict_return)
-    #return "hello"
-    return jsonify(dict_return)
+
+    return jsonify(dict_return) #Return the results back in json format
 
 
 @app.route('/atlas/torque',methods=['GET'])
