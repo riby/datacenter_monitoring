@@ -25,29 +25,6 @@ class NagiosService:
     def setState(self,s): self.State=s
     def setInfo(self,i): self.Info=i
     def setAck(self,a, ): self.Ack = a
-    # Write some HTML about the state of this service
-    # These colors are associated with the colors for nagios status
-    # shown in RackStatus.css
-    def getSummary(self):
-        if self.State==0:
-            state='OK'
-            stateColor='green'
-        elif self.State == 1:
-            state='Warning'
-            stateColor='Gold'
-        elif self.State == 2:
-            if self.Ack:
-                state = 'Critical-Acked'
-                stateColor = 'LightPink'
-            else:
-                state ='Critical'
-                stateColor='red'
-        else:
-            state = 'Unknown'
-            stateColor='orange'
-
-        output='<tr><td>%s</td><td style="color: %s;font-weight: bold;">%s</td><td>%s</td></tr>\n' % (self.Name, stateColor, state, self.Info)
-        return output
 
 ############################################################
 # A wrapper class for a Nagios Host
@@ -65,59 +42,6 @@ class NagiosHost:
     def addService(self,s): self.Services.append(s)
     def getState(self,s): return self.State
 
-    #
-    # Cycle throuh the service to determine how many service are in an Alert Count
-    # and how many are Acknowledged
-    #
-    def getAlertCount(self):  #Get this to return a dict
-        count={'count':0,'Acks':0}
-        for s in self.Services:
-            if s.State ==2:
-                count['count'] += 1
-            if s.Ack:
-                count['Acks'] +=1
-        return count
-    #
-    # Cycle through service and count warnings
-    #
-    def getWarningCount(self):
-        count = 0
-        for s in self.Services:
-            if s.State ==1:
-                count += 1
-        return count
-
-    #
-    # Cycle through service and count number of serives with an Unknown status
-    #
-    def getUnknownCount(self):
-        count = 0
-        for s in self.Services:
-            if s.State ==3:
-                count += 1
-        return count
-    #
-    # Generate the HTML Nagios Status of a Node and its services
-    #
-    #
-    def getSummary(self,NagiosURL):
-        output='<a href="%s/status.cgi?host=%s">Service Details</a><br>\n' % (NagiosURL, self.Name)
-        output +='<a href="%s/extinfo.cgi?type=1&host=%s">Host Details</a><br><br>\n' % (NagiosURL, self.Name)
-
-        if self.State == 0:
-            state = 'UP'
-        else:
-            state = 'Down'
-        output +='State: %s<br>\n' % (state)
-        if len(self.Services) > 0:
-            output +='Services:<br>\n'
-            output +='<table><tr><th>Name</th><th>State</th><th>Information</th></tr>'
-            for s in self.Services:
-                output += s.getSummary()
-            output += '</table>'
-        return output
-
-#
 # Module level function to populate Hosts{} with discoved nodes
 #
 #
@@ -141,12 +65,16 @@ def getData(NagiosSocket):
     #Now retrieve data
     answer=''
     while True:
-        buff = s.recv(4096)
-        if len(buff) == 0:
-            break
-        else:
-            answer += buff
+        try:
+            buff = s.recv(4096)
+            if len(buff) == 0:
+                break
+            else:
+                answer += buff
+        except socket.error, e:
+            print "Socket Error Occured"
     s.close()
+
     # This is meant as a backstop for when the eval
     # fails and we want to see what was eval'ed
     # probably shouldn't be here
@@ -198,9 +126,9 @@ if __name__ == '__main__':
     ts=time.time()
     timestamp = datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d %H:%M:%S')
 
-    f_storage=open(SCRIPT_DIR+'storage_nodes.csv','w+')
-    f_compute=open(SCRIPT_DIR+'compute_nodes.csv','w+')
-    f_switches=open(SCRIPT_DIR+"switches.csv","w+")
+    f_storage=open(SCRIPT_DIR+'/storage_nodes.csv','w+')
+    f_compute=open(SCRIPT_DIR+'/compute_nodes.csv','w+')
+    f_switches=open(SCRIPT_DIR+"/switches.csv","w+")
     
     #In case we need header information it is below for each segment of machines
 
