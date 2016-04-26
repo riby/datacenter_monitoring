@@ -4,7 +4,11 @@ import GangliaStatus
 from flask import Response
 import fabfile as fb
 import TorqueStatus as TS
+from flask import render_template
 import time
+import logging
+from logging.handlers import RotatingFileHandler
+
 Hosts={}
 
 app = Flask(__name__)
@@ -13,6 +17,9 @@ app = Flask(__name__)
 @app.route('/', methods=['GET'])
 def test_server():
     return "Hello World"
+@app.errorhandler(404)
+def page_not_found(error):
+    return render_template('page_not_found.html'), 4044
 
 @app.route('/atlas/nagios/<string:device>',methods=['GET','POST'])
 def get_nagios_data(device):
@@ -84,4 +91,7 @@ def get_ganglia_data():
     #return Response(json.dumps(dct),  mimetype='application/json')
 if __name__ == '__main__':
     print 'End Points /atlas/ganglia  /todo/api/v1.0/tasks'
+    handler = RotatingFileHandler('server.log', maxBytes=10000, backupCount=1)
+    handler.setLevel(logging.INFO)
+    app.logger.addHandler(handler)
     app.run(host='0.0.0.0',port='8080')
