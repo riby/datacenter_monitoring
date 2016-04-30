@@ -2,7 +2,7 @@
 #
 # Expect PBSQuery to be installed and that this machine
 # can run pbsnodes to query torque server
-from PBSQuery import PBSQuery, PBSError
+from pbs.PBSQuery import PBSQuery, PBSError
 import WrapperQStat
 import re
 Hosts={}

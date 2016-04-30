@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: pbs_python
+Version: 4.1.3
+Summary: openpbs/torque python interface
+Home-page: http://subtrac.sara.nl/oss/pbs_python
+Author: Bas van der Vlies
+Author-email: basv@sara.nl
+License: LGPLV3
+Description: UNKNOWN
+Platform: UNKNOWN
