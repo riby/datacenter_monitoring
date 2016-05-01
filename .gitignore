@@ -5,5 +5,4 @@ log
 *.json
 *.swp
 *.csv
-fabfile.py
 *.log
