@@ -15,7 +15,7 @@ do
     echo $(pip install $name)
 done < "$filename"
 
-FILE="credentials.json'"
+FILE="credentials.json"
  
 if [ -f "$FILE" ];
 then

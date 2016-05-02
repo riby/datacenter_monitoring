@@ -6,3 +6,4 @@ log
 *.swp
 *.csv
 *.log
+venv/
