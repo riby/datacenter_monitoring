@@ -1,6 +1,6 @@
 #!/bin/sh
 cd v2/
-virtualenv -p /usr/bin/python2.6 venv
+virtualenv -p python2.7 venv
 source venv/bin/activate
 #pip install -r requirement.txt
 #pip -V
