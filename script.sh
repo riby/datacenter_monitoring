@@ -14,4 +14,28 @@ do
     name="$line"
     echo $(pip install $name)
 done < "$filename"
-python app.py
+
+FILE="credentials.json'"
+ 
+if [ -f "$FILE" ];
+then
+   echo "File $FILE exist."
+else
+   echo "File $FILE does not exist"
+   touch $FILE
+   echo "File created,Enter Data"
+fi
+
+FILE="config.json"
+ 
+if [ -f "$FILE" ];
+then
+   echo "File $FILE exist."
+else
+   echo "File $FILE does not exist"
+   touch $FILE
+   echo "File Created,Enter Data"
+fi
+
+#python app.py
+
