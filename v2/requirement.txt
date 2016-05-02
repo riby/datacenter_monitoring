@@ -8,4 +8,5 @@ numpy
 cython
 nose
 pandas
+scipy
 sklearn
