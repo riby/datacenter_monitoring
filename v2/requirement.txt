@@ -2,3 +2,10 @@ Flask
 Fabric
 pymongo
 requests
+bokeh
+pymongo
+numpy
+cython
+nose
+pandas
+sklearn

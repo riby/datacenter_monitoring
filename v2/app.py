@@ -1,15 +1,31 @@
 #!flask/bin/python
 from flask import Flask, jsonify
 import GangliaStatus
-from flask import Response
+from flask import Response, request
 import fabfile as fb
 import TorqueStatus as TS
 from flask import render_template
 import time
 import logging
 from logging.handlers import RotatingFileHandler
+from bokeh.embed import components
+from bokeh.plotting import figure
+from bokeh.resources import INLINE
+from bokeh.util.string import encode_utf8
+from bokeh.plotting import figure, output_file, show, ColumnDataSource
+from bokeh.models import HoverTool
+from pymongo import MongoClient
+import datetime
+import re
+import numpy as np
+import pandas as pd
+from sklearn.cluster import KMeans
 
 Hosts={}
+
+client = MongoClient()
+db = client['data_monitor']
+
 
 app = Flask(__name__)
 
@@ -80,6 +96,302 @@ def get_ganglia_data():
 
     return jsonify(dct) #Return Data in JSON format
 
+
+def getData_N_Min_device(t):
+    date1 = datetime.datetime.utcnow()-datetime.timedelta(minutes=t)
+    cursor=db.new_dim.find({'date':{"$gte": date1}})
+    return cursor
+
+
+def getData_N_Min_cluster(t):
+    date1 = datetime.datetime.utcnow()-datetime.timedelta(minutes=t)
+    cursor=db.data.find({'date':{"$gte": date1}})
+    return cursor
+
+def getitem(obj, item, default):
+    if item not in obj:
+        return default
+    else:
+        return obj[item]
+
+@app.route("/cluster/snapshot/", methods=['GET', 'POST'])
+def cluster_snapshot():
+    #args = flask.request.args
+    # Get all the form arguments in the url with defaults
+    #new_att = str(getitem(args, 'device_button','G_Swap_Used'))
+    request_att=[]
+    if request.method == "POST":
+        #checked = 'att' in request.form
+        request_att = request.form.getlist('att')
+        #any_selected = bool(selected)
+        request_att=[x.encode('UTF8') for x in request_att]
+        #print(type(request_att))
+        #return str(request_att)
+
+        
+    #print (new_att)
+
+    n_times=getData_N_Min_cluster(5)
+    #n_times=cursor
+    if n_times.count()==0:
+        print ("No Data")
+        #exit(1)
+    data=dict()
+    t=0
+    data=[]
+    #Target only swap space
+
+    #'compute-2-28' removed
+    machine=['compute-2-29',  'compute-9-30', 'compute-9-36', 'compute-9-35','compute-9-34','compute-2-23', 'compute-2-25', 'compute-2-24', 'compute-2-27', 'compute-2-26', 'compute-6-29', 'compute-6-28', 'compute-6-25', 'compute-6-24', 'compute-6-27', 'compute-6-26', 'compute-6-23', 'compute-9-33', 'compute-9-32', 'compute-22-17', 'compute-22-16', 'compute-22-15', 'compute-22-14', 'compute-22-13', 'compute-22-12', 'compute-22-11', 'compute-22-18', 'compute-7-39', 'compute-7-38', 'compute-21-29', 'compute-21-28', 'compute-21-27', 'compute-21-26', 'compute-21-25', 'compute-21-24', 'compute-21-23', 'compute-5-1', 'compute-14-1', 'compute-14-2', 'compute-14-3', 'compute-14-4', 'compute-14-5', 'compute-14-6', 'compute-14-7', 'compute-14-8', 'compute-13-6', 'compute-13-5', 'compute-13-4', 'compute-7-40', 'compute-13-2', 'compute-13-1', 'compute-14-30', 'compute-5-8', 'compute-14-32', 'compute-14-33', 'compute-14-34', 'compute-14-35', 'compute-18-18', 'compute-14-37', 'compute-14-38', 'compute-18-17', 'compute-5-3', 'compute-18-15', 'compute-5-5', 'compute-18-13', 'compute-5-7', 'compute-5-6', 'compute-6-2', 'compute-3-41', 'compute-6-1', 'compute-6-6', 'compute-6-7', 'compute-6-4', 'compute-6-5', 'compute-6-8', 'compute-13-28', 'compute-13-29', 'compute-13-26', 'compute-13-27', 'compute-13-24', 'compute-13-25', 'compute-13-23', 'compute-2-10', 'compute-2-11', 'compute-2-12', 'compute-2-14', 'compute-2-15', 'compute-2-16', 'compute-2-17', 'compute-2-18', 'compute-14-40', 'compute-2-8', 'compute-2-9', 'compute-2-7', 'compute-20-40', 'compute-1-9', 'compute-1-8', 'compute-6-11', 'compute-8-40', 'compute-6-14', 'compute-6-15', 'compute-6-16', 'compute-6-17', 'compute-6-10', 'compute-5-4', 'compute-6-12', 'compute-6-13', 'compute-6-18', 'compute-4-29', 'compute-4-28', 'compute-23-38', 'compute-22-2', 'compute-23-36', 'compute-23-37', 'compute-23-34', 'compute-23-35', 'compute-4-27', 'compute-23-33', 'compute-4-25', 'compute-11-18', 'compute-8-38', 'compute-8-39', 'compute-11-17', 'compute-11-16', 'compute-22-40', 'compute-1-11', 'compute-1-10', 'compute-1-13', 'compute-1-12', 'compute-1-15', 'compute-1-14', 'compute-1-17', 'compute-1-16', 'compute-5-15', 'compute-5-14', 'compute-12-8', 'compute-5-16', 'compute-5-11', 'compute-5-10', 'compute-5-13', 'compute-5-12', 'compute-12-2', 'compute-12-3', 'compute-12-1', 'compute-12-6', 'compute-12-7', 'compute-12-4', 'compute-12-5', 'compute-12-27', 'compute-12-26', 'compute-12-18', 'compute-19-37', 'compute-19-36', 'compute-12-10', 'compute-12-11', 'compute-12-12', 'compute-12-13', 'compute-12-14', 'compute-12-15', 'compute-12-16', 'compute-12-17', 'compute-20-37', 'compute-20-36', 'compute-20-35', 'compute-20-39', 'compute-20-38', 'compute-23-39', 'compute-23-32', 'compute-4-26', 'compute-23-30', 'compute-12-23', 'compute-12-22', 'compute-12-25', 'compute-12-24', 'compute-19-39', 'compute-19-38', 'compute-12-29', 'compute-12-28', 'compute-19-35', 'compute-9-27', 'compute-21-40', 'compute-9-28', 'compute-9-29', 'compute-11-40', 'compute-21-38', 'compute-21-39', 'compute-21-30', 'compute-21-33', 'compute-21-34', 'compute-21-35', 'compute-21-36', 'compute-21-37', 'compute-5-28', 'compute-5-29', 'compute-5-24', 'compute-5-25', 'compute-5-26', 'compute-5-27', 'compute-5-23', 'compute-13-18', 'compute-13-13', 'compute-13-12', 'compute-13-11', 'compute-13-10', 'compute-13-17', 'compute-13-16', 'compute-13-15', 'compute-13-14', 'compute-14-15', 'compute-22-39', 'compute-22-38', 'compute-22-30', 'compute-22-33', 'compute-22-35', 'compute-22-34', 'compute-22-37', 'compute-22-36', 'compute-7-17', 'compute-7-16', 'compute-7-18', 'compute-5-17', 'compute-14-18', 'compute-14-12', 'compute-14-13', 'compute-14-10', 'compute-14-11', 'compute-14-16', 'compute-14-17', 'compute-14-14', 'compute-5-18', 'compute-21-8', 'compute-21-1', 'compute-21-2', 'compute-21-3', 'compute-21-4', 'compute-21-5', 'compute-21-6', 'compute-21-7', 'compute-4-30', 'compute-18-14', 'compute-23-27', 'compute-23-26', 'compute-12-37', 'compute-12-38', 'compute-21-11', 'compute-5-39', 'compute-5-38', 'compute-5-37', 'compute-5-36', 'compute-5-35', 'compute-5-34', 'compute-5-33', 'compute-5-32', 'compute-5-30', 'compute-22-3', 'compute-18-35', 'compute-22-1', 'compute-18-37', 'compute-22-7', 'compute-22-6', 'compute-22-5', 'compute-22-4', 'compute-22-8', 'compute-18-38', 'compute-18-39', 'compute-20-15', 'compute-20-17', 'compute-20-16', 'compute-20-18', 'compute-9-25', 'compute-2-38', 'compute-2-39', 'compute-2-36', 'compute-2-37', 'compute-2-34', 'compute-2-35', 'compute-2-32', 'compute-2-33', 'compute-2-30', 'compute-6-32', 'compute-6-33', 'compute-6-30', 'compute-6-36', 'compute-6-37', 'compute-6-34', 'compute-6-35', 'compute-6-38', 'compute-6-39', 'compute-9-26', 'compute-21-12', 'compute-21-13', 'compute-23-16', 'compute-23-17', 'compute-21-16', 'compute-21-17', 'compute-21-14', 'compute-21-15', 'compute-21-18', 'compute-23-18', 'compute-8-18', 'compute-8-16', 'compute-8-17', 'compute-11-39', 'compute-11-38', 'compute-22-28', 'compute-22-29', 'compute-22-23', 'compute-22-26', 'compute-22-27', 'compute-22-24', 'compute-22-25', 'compute-13-8', 'compute-13-7', 'compute-19-13', 'compute-19-15', 'compute-19-14', 'compute-19-17', 'compute-19-16', 'compute-13-3', 'compute-14-27', 'compute-14-26', 'compute-14-25', 'compute-14-24', 'compute-14-23', 'compute-14-36', 'compute-14-29', 'compute-14-28', 'compute-18-16', 'compute-14-39', 'compute-3-39', 'compute-3-38', 'compute-5-2', 'compute-13-39', 'compute-13-38', 'compute-13-35', 'compute-13-34', 'compute-13-37', 'compute-13-36', 'compute-13-30', 'compute-13-33', 'compute-13-32', 'compute-3-40', 'compute-6-3', 'compute-13-40', 'compute-18-36', 'compute-23-29', 'compute-23-28', 'compute-23-25', 'compute-4-32', 'compute-4-33', 'compute-4-34', 'compute-4-35', 'compute-19-40', 'compute-18-40']
+    for t1 in n_times:
+        devices=t1['data'].keys()
+        for d in machine:
+            lst=[]
+            lst.append(d)
+            for x in xrange(0,39):
+                lst.append(t1['data'][d][x][1])
+            data.append(lst)
+        t=t+1
+
+    res=['Device','G_Swap_Total', 'G_Swap_Free', 'G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'G_Mem_Total', 'T_State', 'T_Slots', 'T_SlotsUsed', 'T_AvailMem(MB)', 'T_TotalMem(MB)/Swap', 'T_Time_Last_Rec', 'T_LoadAve', 'T_NetLoad(MB)',
+    'N_Status', 'N_Swap_Service', 'N_Swap_State', 'N_Swap_Info', 'N_IPMI_Service', 'N_IPMI_State', 'N_IPMI_Info', 'N_FreeSpace_Service', 'N_FreeSpace_State', 'N_FreeSpace_Info', 'N_CVMFS-OSG_Service', 'N_CVMFS-OSG_State', 'N_CVMFS-OSG_Info', 'N_CVMFS-CERN_Service', 'N_CVMFS-CERN_State', 'N_CVMFS-CERN_Info',
+     'N_CVMFS-CONDB_Service', 'N_CVMFS-CONDB_State', 'N_CVMFS-CONDB_Info']
+
+
+    att=['G_Swap_Used','G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_AvailMem(MB)', 'T_LoadAve', 'T_NetLoad(MB)']
+
+    new_att=['Device','G_Swap_Used', 'G_Proc_Run', 'G_Cpu_User', 'G_Cpu_Wio', 'G_Load_One', 'G_Load', 'G_Five', 'G_Load_Fifteen', 'G_Mem_Cached', 'T_State',  'T_Slots', 'T_SlotsUsed','T_AvailMem(MB)', 'T_Time_Last_Rec', 'T_LoadAve','N_Status', 'N_Swap_State','N_IPMI_State','N_IPMI_Info','N_FreeSpace_State', 'N_CVMFS-OSG_State', 'N_CVMFS-CERN_State', 'N_CVMFS-CONDB_State']
+    #new_att=['Device','G_Swap_Used','T_AvailMem(MB)','G_Five','G_Cpu_Wio']
+    if request_att !=[]:
+        new_att=request_att
+
+    print (request_att)
+    new_index=[]
+
+    full_index=[]
+
+    for i in new_att:
+        full_index.append(res.index(i))
+
+    for a in att:
+        new_index.append(res.index(a))
+
+    new_data=[]
+
+    for d in data:
+        core_count=int(d[14])
+        if core_count!=0:
+            for i in new_index:
+                d[i]=round(float(d[i])/core_count,2)
+                d[i]=unicode(d[i])
+        tmp=[]
+        for i in full_index:
+            if i==res.index('N_IPMI_Info'):
+                code_in_IPMI=re.findall(r'\d+',str(d[i]))
+                if code_in_IPMI==[]:
+                    d[i]='0'
+                else:
+                    d[i]=code_in_IPMI[0]
+            tmp.append(d[i])
+    #    tmp=[d[i] for i in full_index]
+        new_data.append(tmp)
+
+    df=pd.DataFrame(new_data)
+    df.columns=new_att
+
+    X = df.ix[:,1:len(df.columns)].values
+    y = df.ix[:,0].values
+
+    from sklearn.preprocessing import StandardScaler
+    X_std = StandardScaler().fit_transform(X)
+
+    from sklearn.decomposition import PCA as sklearnPCA
+    sklearn_pca = sklearnPCA(n_components=2)
+    Y_sklearn   = sklearn_pca.fit_transform(X_std)
+
+
+    x_corr=[]
+    y_corr=[]
+    label=[]
+
+    x_l=[]
+    y_l=[]
+    for lab in machine:
+        x_l.append(Y_sklearn[y==lab, 0].tolist())
+        y_l.append(Y_sklearn[y==lab, 1].tolist())
+
+    for x in x_l:
+        for x1 in x:
+            x_corr.append(x1)
+
+    for y in y_l:
+        for y1 in y:
+            y_corr.append(y1)
+
+    l=len(x_l[0])
+
+    for lab in machine:
+        for i in [lab for x in range(0,l)]:
+            label.append(i)
+
+
+    new_arr=np.array(zip(x_corr,y_corr))
+
+    k_means=KMeans(n_clusters=4)
+    k_means.fit(new_arr)
+
+    centroid=k_means.cluster_centers_
+    labels=k_means.labels_
+
+    colors=["green","red","cyan","yellow","blue"]
+
+    color_src=[]
+    for i in range(len(x_corr)):
+        color_src.append(colors[labels[i]])
+
+
+    #output_file("toolbar.html")
+    TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,tap,previewsave,box_select,poly_select,lasso_select"
+
+    source = ColumnDataSource(
+            data=dict(
+                x=x_corr,
+                y=y_corr,
+                desc=label,
+               # colors=color_src,
+                
+            )
+        )
+    hover = HoverTool(
+            tooltips="""
+            <div>
+                
+                <div>
+                    <span style="font-size: 17px; font-weight: bold;">@desc</span>
+                    <span style="font-size: 15px; color: #966;">[$index]</span>
+                </div>
+                <div>
+                    <span style="font-size: 15px;">Location</span>
+                    <span style="font-size: 10px; color: #696;">($x, $y)</span>
+                </div>
+            </div>
+            """
+        )
+    #TOOLS= [BoxZoomTool(), ResetTool(),hover,ResizeTool(),WheelZoomTool()]
+
+    TOOLS=["pan,wheel_zoom,box_zoom,reset,resize",hover]
+    p = figure(plot_width=600, plot_height=600, tools=TOOLS,
+               title="Mouse over the dots")
+
+    p.circle('x', 'y', size=30, source=source,fill_color=color_src)
+    p.scatter(centroid[:,0],centroid[:,1], color='black')#,s=200,linewidths=5,zorder=10)
+
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # For more details see:
+    #   http://bokeh.pydata.org/en/latest/docs/user_guide/embedding.html#components
+    script, div = components(p, INLINE)
+    html = flask.render_template(
+        'cluster_snapshot.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
+    return encode_utf8(html)
+
+
+
+@app.route("/device/id/")
+def status_newDimensions():
+    """ Very simple embedding of a polynomial chart
+    """
+
+    # Grab the inputs arguments from the URL
+    # This is automated by the button
+    args = flask.request.args
+
+    # Get all the form arguments in the url with defaults
+    device = str(getitem(args, 'device', 'compute-2-29'))
+    #device='compute-2-29'
+
+    # Create a polynomial line graph
+    n_times=getData_N_Min_device(60)
+    #n_times=cursor
+    if n_times.count()==0:
+        return "No Data"
+        #exit(1)
+    data=dict()
+    t=0
+    data=[]
+    
+    choose_machine=device
+    x=[]
+    y=[]
+    label=[]
+    time_label=[]
+    i=1
+    for t1 in n_times:
+        device_data=t1[choose_machine]
+        x.append(device_data[0])
+        y.append(device_data[1])
+        label.append(choose_machine)
+        time_label.append(i)
+        i+=1
+
+    #output_file("trace_new_dims.html")
+    TOOLS="resize,crosshair,pan,wheel_zoom,box_zoom,reset,tap,previewsave,box_select,poly_select,lasso_select"
+
+    source = ColumnDataSource(
+            data=dict(
+                x=x,
+                y=y,
+                desc=time_label,
+               # colors=color_src,
+                
+            )
+        )
+    hover = HoverTool(
+            tooltips="""
+            <div>
+                
+                <div>
+                    <span style="font-size: 17px; font-weight: bold;">@desc</span>
+                    <span style="font-size: 15px; color: #966;">[$index]</span>
+                </div>
+                <div>
+                    <span style="font-size: 15px;">Location</span>
+                    <span style="font-size: 10px; color: #696;">($x, $y)</span>
+                </div>
+            </div>
+            """
+        )
+    TOOLS=["pan,wheel_zoom,box_zoom,reset,resize",hover]
+    p = figure(plot_width=600, plot_height=600, tools=TOOLS,
+               title="Mouse over the dots")
+
+    
+
+    p.line('x', 'y', source=source)
+
+    # Configure resources to include BokehJS inline in the document.
+    # For more details see:
+    #   http://bokeh.pydata.org/en/latest/docs/reference/resources_embedding.html#bokeh-embed
+    js_resources = INLINE.render_js()
+    css_resources = INLINE.render_css()
+
+    # For more details see:
+    #   http://bokeh.pydata.org/en/latest/docs/user_guide/embedding.html#components
+    script, div = components(p, INLINE)
+    html = flask.render_template(
+        'embed.html',
+        plot_script=script,
+        plot_div=div,
+        js_resources=js_resources,
+        css_resources=css_resources,
+    )
+    return encode_utf8(html)
 
 if __name__ == '__main__':
     ##Adding Handlers to get server log and set logging levels

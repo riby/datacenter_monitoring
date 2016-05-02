@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset='utf-8' />
+    <meta http-equiv='content-type' content='text/html; charset=utf-8' />
+
+    <title>Embed Demo</title>
+
+    {{ js_resources|indent(4)|safe }}
+
+    {{ css_resources|indent(4)|safe }}
+
+    {{ plot_script|indent(4)|safe }}
+
+  </head>
+  <body>
+    <!-- A simple form for changing the graph -->
+    <p> Select your device: </p>
+    <a href="/device/id/">Check Device Last health</a>
+    <form name="device_button" method='POST'>
+
+<input type='checkbox' name="att" value='Device' checked>Device</input>       
+<input type='checkbox' name="att" value='G_Swap_Used' checked>G_Swap_Used</input>
+<input type='checkbox' name="att" value='G_Proc_Run'>G_Proc_Run</input>
+<input type='checkbox' name="att" value='G_Cpu_User'>G_Cpu_User</input>
+<input type='checkbox' name="att" value='G_Cpu_Wio' checked>G_Cpu_Wio</input>
+<input type='checkbox' name="att" value='G_Load_One'>G_Load_One</input>
+<input type='checkbox' name="att" value='G_Load'>G_Load</input>
+<input type='checkbox' name="att" value='G_Five' checked>G_Five</input>
+<input type='checkbox' name="att" value='G_Load_Fifteen'>G_Load_Fifteen</input>
+<input type='checkbox' name="att" value='G_Mem_Cached'>G_Mem_Cached</input>
+<input type='checkbox' name="att" value='T_State'>T_State</input>
+<input type='checkbox' name="att" value='T_Slots'>T_Slots</input>
+<input type='checkbox' name="att" value='T_SlotsUsed'>T_SlotsUsed</input>
+<input type='checkbox' name="att" value='T_AvailMem(MB)' checked>T_AvailMem(MB)</input>
+<input type='checkbox' name="att" value='T_Time_Last_Rec'>T_Time_Last_Rec</input>
+<input type='checkbox' name="att" value='T_LoadAve'>T_LoadAve</input>
+<input type='checkbox' name="att" value='N_Status'>N_Status</input>
+<input type='checkbox' name="att" value='N_Swap_State'>N_Swap_State</input>
+<input type='checkbox' name="att" value='N_IPMI_State'>N_IPMI_State</input>
+<input type='checkbox' name="att" value='N_IPMI_Info'>N_IPMI_Info</input>
+<input type='checkbox' name="att" value='N_FreeSpace_State'>N_FreeSpace_State</input>
+<input type='checkbox' name="att" value='N_CVMFS-OSG_State'>N_CVMFS-OSG_State</input>
+<input type='checkbox' name="att" value='N_CVMFS-CERN_State'>N_CVMFS-CERN_State</input>
+<input type='checkbox' name="att" value='N_CVMFS-CONDB_State'>N_CVMFS-CONDB_State</input>
+
+     
+        <br>
+     
+        <button type="submit">Submit</button>
+    </form>
+    {{ plot_div|indent(4)|safe }}
+   
+  </body>
+</html>

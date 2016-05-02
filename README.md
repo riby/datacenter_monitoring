@@ -17,5 +17,16 @@ python app.py
 
 5) Update crontab
 
+Instuction to install other libraries:
+scpipy need dependencies
+
+Use of Conda
+wget https://repo.continuum.io/miniconda/Miniconda2-latest-Linux-x86_64.sh
+chmod +x Miniconda2-latest-Linux-x86_64.sh
+./Miniconda2-latest-Linux-x86_64.sh
+
+Install scipy
+conda install scipy
+
 
 
