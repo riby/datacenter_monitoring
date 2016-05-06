@@ -1,0 +1,1 @@
+*/5 * * * *  python /cluster/home/rsidhu/code/datacenter_monitoring/v2/curl_getData.py  > /cluster/home/rsidhu/code/datacenter_monitoring/log 2>&1
