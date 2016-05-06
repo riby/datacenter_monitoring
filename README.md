@@ -1,4 +1,4 @@
-# datacenter_monitoring
+# Datacenter Monitoring
 A tool to combine data from Nagios, Ganglia and Torque in order to perform Machine learning based analytics.
 
 # MongoDB Data Base required:
@@ -43,7 +43,7 @@ Install virtual environment for python to run the scripts
 curl -o /tmp/ez_setup.py https://bootstrap.pypa.io/ez_setup.py
 /usr/local/bin/python2.7 /tmp/ez_setup.py
 
-# Get all the scripts from GITHUM https://github.com/riby/datacenter_monitoring.git
+## Get all the scripts from GITHUM https://github.com/riby/datacenter_monitoring.git
 - Create a home directory you want to place code in 
 
 mkdir HOME_DIR
@@ -67,7 +67,8 @@ source v2/venv/bin/activate
 - run app.py
 python app.py
 
-- Update crontab
+- Update crontab with base folder path
+crontab crontab.txt
 
 Instuction to install other libraries:
 scpipy need dependencies
